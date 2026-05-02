@@ -45,8 +45,15 @@ async def create_new_account(
     payload: AccountCreate, 
     db: AsyncSession = Depends(get_db)
 ):
-    """Crea una nueva cuenta bancaria con saldo inicial en 0."""
-    return await create_account(db, payload.owner_name, payload.email, payload.password)
+    """Crea una nueva cuenta bancaria con saldo inicial."""
+    from sqlalchemy.exc import IntegrityError
+    try:
+        return await create_account(db, payload.owner_name, payload.email, payload.password)
+    except IntegrityError as e:
+        await db.rollback()
+        if "ix_accounts_email" in str(e) or "UniqueViolationError" in str(e):
+            raise HTTPException(status_code=400, detail="Este correo electrónico ya está registrado.")
+        raise HTTPException(status_code=400, detail="Error de integridad en los datos.")
 
 
 @router.post("/accounts/{account_id}/fund", response_model=AccountResponse)
