@@ -1,6 +1,6 @@
-# Alfred Bank - Reto HabiCapital 2026-Q2
+# Alfred Bank 
 
-¡Hola! Soy Heider Navarro. Este es mi entregable para el reto técnico de HabiCapital. 
+¡Hola! Soy Heider Navarro. 
 
 Aquí abajo te explico detalladamente cómo pensé, diseñé y ejecuté este proyecto.
 
