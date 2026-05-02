@@ -3,11 +3,28 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc, or_
 
 from models.domain import Account, Transaction
+from core.security import get_password_hash
 
-async def create_account(db: AsyncSession, owner_name: str) -> Account:
-    """Creates a new account with an initial balance of 0."""
-    new_account = Account(owner_name=owner_name, balance_cents=0)
+async def create_account(db: AsyncSession, owner_name: str, email: str, password: str) -> Account:
+    """Creates a new account with an initial balance."""
+    hashed_password = get_password_hash(password)
+    new_account = Account(
+        owner_name=owner_name, 
+        email=email,
+        hashed_password=hashed_password,
+        balance_cents=50000000  # Bono de 500k COP para cuentas nuevas (demo)
+    )
     db.add(new_account)
+    await db.flush()  # Para obtener el ID generado y poder asignarlo a la transaccion
+    
+    # Crear la transaccion del bono para que se refleje en el historial
+    deposit_tx = Transaction(
+        to_account_id=new_account.id, 
+        amount_cents=50000000,
+        description="Bono de Bienvenida"
+    )
+    db.add(deposit_tx)
+    
     await db.commit()
     await db.refresh(new_account)
     return new_account
@@ -50,8 +67,37 @@ async def get_account_statement(db: AsyncSession, account_id: UUID) -> dict:
     res_tx = await db.execute(stmt_tx)
     transactions = res_tx.scalars().all()
     
+    # Extraer IDs únicos para buscar los nombres
+    account_ids = set()
+    for tx in transactions:
+        if tx.from_account_id: account_ids.add(tx.from_account_id)
+        account_ids.add(tx.to_account_id)
+        
+    names_map = {}
+    if account_ids:
+        stmt_names = select(Account.id, Account.owner_name).where(Account.id.in_(account_ids))
+        res_names = await db.execute(stmt_names)
+        names_map = {row.id: row.owner_name for row in res_names.all()}
+        
+    tx_list = []
+    for tx in transactions:
+        is_deposit = tx.to_account_id == account_id
+        counterparty_id = tx.from_account_id if is_deposit else tx.to_account_id
+        counterparty_name = names_map.get(counterparty_id, "Externo") if counterparty_id else "Externo"
+        
+        tx_dict = {
+            "id": tx.id,
+            "from_account_id": tx.from_account_id,
+            "to_account_id": tx.to_account_id,
+            "amount_cents": tx.amount_cents,
+            "description": tx.description,
+            "timestamp": tx.timestamp,
+            "counterparty_name": counterparty_name
+        }
+        tx_list.append(tx_dict)
+    
     return {
         "account_id": account.id,
         "balance_cents": account.balance_cents,
-        "transactions": transactions
+        "transactions": tx_list
     }

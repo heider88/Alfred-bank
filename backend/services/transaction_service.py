@@ -9,7 +9,8 @@ async def execute_transfer(
     db: AsyncSession,
     from_account_id: UUID,
     to_account_id: UUID,
-    amount_cents: int
+    amount_cents: int,
+    description: str = "Transferencia"
 ) -> Transaction:
     """
     Executes a transfer between two accounts within a single database transaction.
@@ -45,7 +46,8 @@ async def execute_transfer(
         new_transaction = Transaction(
             from_account_id=from_account_id,
             to_account_id=to_account_id,
-            amount_cents=amount_cents
+            amount_cents=amount_cents,
+            description=description
         )
         db.add(new_transaction)
 

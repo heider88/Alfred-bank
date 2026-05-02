@@ -12,6 +12,8 @@ interface Transaction {
   to_account_id: string;
   amount_cents: number;
   timestamp: string;
+  description?: string;
+  counterparty_name?: string;
 }
 
 interface StatementData {
@@ -20,11 +22,12 @@ interface StatementData {
   transactions: Transaction[];
 }
 
-const ACCOUNT_ID = "51014194-7f66-4424-8035-9faf861ed86f";
-// API Dinámica basada en variables de entorno o valor por defecto
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1";
 
+import { useRouter } from "next/navigation";
+
 export default function DashboardPage() {
+  const router = useRouter();
   const [data, setData] = useState<StatementData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +36,25 @@ export default function DashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_URL}/accounts/${ACCOUNT_ID}/statement`);
+      // 1. Obtener el token (por ahora simulado si no existe una página de login real, en producción vendría de localStorage)
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No estás autenticado. Por favor inicia sesión.");
+      }
+
+      // 2. Obtener mi cuenta (/me)
+      const meResponse = await fetch(`${API_URL}/accounts/me`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (!meResponse.ok) {
+        throw new Error("Sesión expirada o inválida.");
+      }
+      const myAccount = await meResponse.json();
+
+      // 3. Obtener el estado de cuenta
+      const response = await fetch(`${API_URL}/accounts/${myAccount.id}/statement`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
       
       if (!response.ok) {
         // Podría ser un 404 (cuenta no encontrada) o un 500
@@ -44,6 +65,11 @@ export default function DashboardPage() {
       const result: StatementData = await response.json();
       setData(result);
     } catch (err: any) {
+      if (err.message.includes("autenticado") || err.message.includes("Sesión")) {
+        router.push("/login");
+        return;
+      }
+      
       // Capturamos si el servidor está apagado (Failed to fetch) o si tiró error
       setError(
         err.message === "Failed to fetch" 
@@ -60,7 +86,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <DashboardLayout>
+    <DashboardLayout accountId={data?.account_id}>
       <div className="flex flex-col gap-8">
         
         <header>
@@ -167,14 +193,20 @@ export default function DashboardPage() {
                           
                           <div className="flex flex-col">
                             <span className="text-sm font-bold text-slate-900">
-                              {isDeposit ? "Depósito Recibido" : "Transferencia Enviada"}
+                              {tx.description || (isDeposit ? "Depósito Recibido" : "Transferencia Enviada")}
                             </span>
-                            <span className="text-xs font-medium text-slate-500">
-                              {new Date(tx.timestamp).toLocaleString("es-CO", {
-                                dateStyle: "medium",
-                                timeStyle: "short",
-                              })}
-                            </span>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-xs font-semibold text-slate-600">
+                                {isDeposit ? 'De:' : 'Para:'} {tx.counterparty_name || 'Externo'}
+                              </span>
+                              <span className="text-xs text-slate-300">•</span>
+                              <span className="text-xs font-medium text-slate-500">
+                                {new Date(tx.timestamp).toLocaleString("es-CO", {
+                                  dateStyle: "medium",
+                                  timeStyle: "short",
+                                })}
+                              </span>
+                            </div>
                           </div>
                         </div>
 

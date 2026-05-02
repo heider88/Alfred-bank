@@ -6,11 +6,20 @@ BASE_DIR=$(pwd)
 # Función para detener todo al presionar Ctrl+C
 trap "echo -e '\n🛑 Deteniendo servicios...'; kill %1 %2; sudo docker compose -f $BASE_DIR/backend/docker-compose.yml -p habi down; exit" SIGINT
 
-echo "🧹 1/4. Limpiando contenedores antiguos..."
-sudo docker rm -f habi_postgres 2>/dev/null || true
+echo "🧹 1/4. Verificando contenedores..."
+# Ya no borramos el contenedor para no perder los datos del volumen (a menos que se quiera resetear)
+# sudo docker rm -f habi_postgres 2>/dev/null || true
 
 echo "🐳 2/4. Levantando base de datos (Docker)..."
 sudo docker compose -f "$BASE_DIR/backend/docker-compose.yml" -p habi up -d
+
+echo "⏳ Esperando a que PostgreSQL inicie correctamente..."
+sleep 4
+
+echo "🌱 2.5/4. Poblando base de datos con datos de prueba (seed)..."
+cd "$BASE_DIR/backend"
+source venv/bin/activate
+python seed.py
 
 echo "🐍 3/4. Iniciando el Backend (FastAPI)..."
 # Entramos a backend, activamos venv y lanzamos uvicorn usando la ruta del venv

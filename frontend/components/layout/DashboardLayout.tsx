@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Sidebar from "./Sidebar";
 import TopNavbar from "./TopNavbar";
+import AlfredChat from "@/components/chat/AlfredChat";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({ children, accountId }: { children: React.ReactNode, accountId?: string }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
@@ -23,6 +24,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </main>
       </div>
+
+      {/* Chatbot flotante (solo renderiza si hay cuenta cargada) */}
+      {accountId && <AlfredChat accountId={accountId} />}
     </div>
   );
 }

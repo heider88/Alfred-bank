@@ -9,9 +9,9 @@ interface SidebarProps {
 
 const navItems = [
   { name: "Resumen", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Transferencias", href: "/transferencias", icon: ArrowRightLeft },
-  { name: "Historial", href: "/historial", icon: History },
-  { name: "Configuración", href: "/configuracion", icon: Settings },
+  { name: "Transferencias", href: "/dashboard/transferencias", icon: ArrowRightLeft },
+  { name: "Historial", href: "/dashboard/historial", icon: History },
+  { name: "Configuración", href: "/dashboard/configuracion", icon: Settings },
 ];
 
 export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {

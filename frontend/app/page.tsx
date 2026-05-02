@@ -1,7 +1,8 @@
 "use client";
 
 import { motion, Variants } from "framer-motion";
-import { ArrowRight, Smartphone, Zap, Shield, Sparkles, CreditCard, ChevronRight } from "lucide-react";
+import { ArrowRight, Smartphone, Zap, Shield, Sparkles, CreditCard, ChevronRight, Check } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
@@ -47,10 +48,10 @@ export default function LandingPage() {
             <Link href="#how-it-works" className="hover:opacity-60 transition-opacity">¿Cómo funciona?</Link>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="text-sm font-bold px-4 py-2 hover:bg-black/5 rounded-full transition-colors hidden sm:block">
+            <Link href="/login" className="text-sm font-bold px-4 py-2 hover:bg-black/5 rounded-full transition-colors hidden sm:block">
               Ingresar
             </Link>
-            <Link href="/dashboard" className="bg-[#0A0A0A] text-white text-sm font-bold px-5 py-2.5 rounded-full hover:bg-black/80 transition-transform hover:scale-105 flex items-center gap-2">
+            <Link href="/register" className="bg-[#0A0A0A] text-white text-sm font-bold px-5 py-2.5 rounded-full hover:bg-black/80 transition-transform hover:scale-105 flex items-center gap-2">
               Abrir cuenta <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -91,7 +92,7 @@ export default function LandingPage() {
                 </motion.p>
                 
                 <motion.div variants={itemVariants} className="mt-10 flex flex-wrap gap-4">
-                  <Link href="/dashboard" className="bg-[#CCFF00] text-black font-bold text-lg px-8 py-4 rounded-full shadow-[0_4px_24px_-4px_rgba(204,255,0,0.5)] hover:shadow-[0_8px_32px_-4px_rgba(204,255,0,0.6)] hover:-translate-y-1 transition-all flex items-center gap-2">
+                  <Link href="/register" className="bg-[#CCFF00] text-black font-bold text-lg px-8 py-4 rounded-full shadow-[0_4px_24px_-4px_rgba(204,255,0,0.5)] hover:shadow-[0_8px_32px_-4px_rgba(204,255,0,0.6)] hover:-translate-y-1 transition-all flex items-center gap-2">
                     Comenzar ahora
                   </Link>
                   <Link href="#features" className="bg-white/60 backdrop-blur-md text-black font-bold text-lg px-8 py-4 rounded-full border border-black/5 hover:bg-white transition-all flex items-center gap-2">
@@ -149,6 +150,77 @@ export default function LandingPage() {
           </motion.div>
         </section>
 
+        {/* Alfred AI Section */}
+        <section className="py-24 px-6 md:px-12 bg-[#0A0A0A] text-white overflow-hidden relative">
+          <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[50vw] h-[50vw] max-w-[600px] max-h-[600px] bg-[#CCFF00] rounded-full blur-[150px] opacity-[0.07] pointer-events-none"></div>
+          <div className="max-w-6xl mx-auto relative z-10">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 mb-8 backdrop-blur-sm">
+                  <Sparkles className="w-4 h-4 text-[#CCFF00]" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-white">Inteligencia Artificial</span>
+                </div>
+                <h2 className="font-display font-bold text-4xl md:text-6xl mb-6 tracking-tighter">
+                  Conoce a Alfred, <br/> tu CFO personal.
+                </h2>
+                <p className="text-white/60 text-lg md:text-xl font-medium mb-10 leading-relaxed">
+                  No más dudas sobre en qué se te fue el dinero. Alfred analiza tus finanzas en tiempo real, te da recomendaciones y responde cualquier pregunta sobre tus movimientos. Todo por un chat rápido y natural.
+                </p>
+                <ul className="space-y-5 mb-10">
+                  {['Análisis de gastos automático', 'Recomendaciones de ahorro', 'Respuestas en lenguaje natural'].map((item, i) => (
+                    <li key={i} className="flex items-center gap-4 text-base font-medium text-white/80">
+                      <div className="w-6 h-6 rounded-full bg-[#CCFF00]/20 flex items-center justify-center text-[#CCFF00] shrink-0">
+                        <Zap className="w-3.5 h-3.5" fill="currentColor" />
+                      </div>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/register" className="inline-flex items-center gap-2 font-bold text-[#CCFF00] hover:text-[#b8e600] transition-colors">
+                  Pruébalo gratis en tu cuenta <ArrowRight className="w-5 h-5" />
+                </Link>
+              </div>
+
+              {/* Chat Mockup */}
+              <div className="relative">
+                <div className="w-full max-w-md mx-auto bg-zinc-900/80 backdrop-blur-xl border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden">
+                  <div className="border-b border-white/10 bg-white/5 px-6 py-4 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center overflow-hidden shrink-0">
+                      <Image src="/alfreed.png" alt="Alfred" width={40} height={40} className="object-cover" />
+                    </div>
+                    <div>
+                      <h3 className="font-display font-bold text-white tracking-wide">alfred.</h3>
+                      <p className="text-xs text-[#CCFF00] uppercase tracking-wider font-semibold">Online</p>
+                    </div>
+                  </div>
+                  <div className="p-6 space-y-6">
+                    <div className="flex flex-col items-end">
+                      <div className="bg-[#CCFF00] text-black text-sm font-medium px-4 py-3 rounded-2xl rounded-tr-sm max-w-[85%]">
+                        ¿Cuánto gasté en Starbucks esta semana? ☕
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-start">
+                      <div className="bg-white/10 text-white text-sm font-medium px-4 py-3 rounded-2xl rounded-tl-sm border border-white/5 max-w-[90%] leading-relaxed">
+                        Has gastado <span className="font-bold text-[#CCFF00]">$37,000 COP</span> en Starbucks en los últimos 7 días (2 transacciones). Te recomiendo crear un 'Bolsillo' para cafés si es un gasto recurrente.
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <div className="bg-[#CCFF00] text-black text-sm font-medium px-4 py-3 rounded-2xl rounded-tr-sm max-w-[85%]">
+                        ¡Buena idea! 💡
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-4 border-t border-white/10 bg-black/50">
+                    <div className="h-10 bg-white/5 border border-white/10 rounded-xl px-4 flex items-center">
+                      <span className="text-white/30 text-sm">Escribe a Alfred...</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Features Bento Grid */}
         <section id="features" className="py-24 px-6 md:px-12 bg-white">
           <div className="max-w-6xl mx-auto">
@@ -174,7 +246,7 @@ export default function LandingPage() {
                   <p className="text-black/60 font-medium text-lg leading-relaxed mb-8">
                     Las transferencias y pagos suceden en milisegundos. Sin pantallas de carga eternas, sin procesos confusos.
                   </p>
-                  <Link href="/dashboard" className="inline-flex items-center gap-2 font-bold hover:gap-4 transition-all">
+                  <Link href="/register" className="inline-flex items-center gap-2 font-bold hover:gap-4 transition-all">
                     Pruébalo ahora <ArrowRight className="w-5 h-5" />
                   </Link>
                 </div>
@@ -244,7 +316,7 @@ export default function LandingPage() {
             <p className="text-xl md:text-2xl text-white/60 mb-12 max-w-2xl font-medium">
               Abre tu cuenta en menos de 3 minutos. Sin sucursales, sin papeleos interminables. 
             </p>
-            <Link href="/dashboard" className="bg-[#CCFF00] text-black font-extrabold text-xl px-12 py-5 rounded-full hover:scale-105 transition-transform flex items-center gap-3">
+            <Link href="/register" className="bg-[#CCFF00] text-black font-extrabold text-xl px-12 py-5 rounded-full hover:scale-105 transition-transform flex items-center gap-3">
               Crear mi cuenta <ArrowRight className="w-6 h-6" />
             </Link>
           </div>
