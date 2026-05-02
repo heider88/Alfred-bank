@@ -7,8 +7,10 @@ from sqlalchemy.orm import declarative_base
 # Cargar variables de entorno desde el archivo .env
 load_dotenv()
 
-# Obtener URL de conexión. Usamos SQLite en memoria como fallback si no existe (para evitar que Cloud Run crashee en el arranque)
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
+# Obtener URL de conexión. Lanzamos un error claro si no está configurada para evitar fallos silenciosos.
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
+if not SQLALCHEMY_DATABASE_URL:
+    raise ValueError("La variable de entorno DATABASE_URL no está configurada en el archivo .env")
 
 # Configuración del motor asíncrono (SQLAlchemy 2.0)
 engine = create_async_engine(

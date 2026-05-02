@@ -10,7 +10,7 @@ load_dotenv()
 # Importamos la configuración de base de datos y la metadata
 from core.database import engine, Base
 # Importamos explícitamente los modelos para que Base.metadata los reconozca al crear las tablas
-from models.domain import Account, Transaction
+from models.domain import Account, Transaction, Pocket
 from api.routes import router as api_router
 from api.auth import router as auth_router
 
@@ -20,12 +20,23 @@ async def lifespan(app: FastAPI):
     Context Manager para manejar el ciclo de vida de la aplicación.
     Ejecuta la creación asíncrona de las tablas en PostgreSQL al arrancar.
     """
+    print("⏳ Intentando conectar a la base de datos...")
     try:
         async with engine.begin() as conn:
-            # Crea las tablas si no existen en la base de datos alfred_db
+            # Crea las tablas si no existen en la base de datos
             await conn.run_sync(Base.metadata.create_all)
+            print("✅ Conexión a la base de datos EXITOSA. Tablas verificadas.")
     except Exception as e:
-        print(f"Advertencia: No se pudo conectar a la base de datos durante el inicio. {e}")
+        print("\n" + "="*60)
+        print("❌ ERROR CRÍTICO: FALLÓ LA CONEXIÓN A LA BASE DE DATOS ❌")
+        print("="*60)
+        print(f"MOTIVO DEL FALLO: {str(e)}")
+        print("\nPosibles causas:")
+        print("1. Si estás en local: ¿Docker está corriendo? (sudo docker compose up -d)")
+        print("2. Si estás en Cloud Run: ¿La variable DATABASE_URL está bien configurada en la consola?")
+        print("3. ¿La IP de Cloud Run tiene permisos en el firewall de tu base de datos?")
+        print("4. ¿Olvidaste poner 'postgresql+asyncpg://' al inicio de tu URL?")
+        print("="*60 + "\n")
     
     yield # La aplicación maneja peticiones aquí
     
@@ -45,7 +56,7 @@ app = FastAPI(
 # Configuración estricta de CORS para permitir la comunicación con el Frontend (Next.js)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000","https://alfred-bank.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
