@@ -80,6 +80,11 @@ export default function AlfredChat({ accountId }: { accountId: string }) {
 
     setInput("");
     
+    // Convert current messages state to history format, excluding the initial system greeting
+    const historyToSend = messages
+      .filter(m => m.id !== "init")
+      .map(m => ({ role: m.role, content: m.content }));
+      
     const newUserMsg: Message = { id: Date.now().toString(), role: "user", content: text };
     setMessages((prev) => [...prev, newUserMsg]);
     setIsLoading(true);
@@ -94,7 +99,8 @@ export default function AlfredChat({ accountId }: { accountId: string }) {
           },
           body: JSON.stringify({
               account_id: accountId,
-              message: text
+              message: text,
+              history: historyToSend
           })
       });
       if (!response.ok) {

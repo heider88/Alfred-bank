@@ -88,9 +88,14 @@ class PocketResponse(BaseModel):
 
 # --- Chat Schemas ---
 
+class ChatMessageItem(BaseModel):
+    role: str
+    content: str
+
 class ChatRequest(BaseModel):
     account_id: str = Field(..., description="ID de la cuenta del usuario")
     message: str = Field(..., description="Mensaje del usuario")
+    history: List[ChatMessageItem] = Field(default_factory=list, description="Historial de mensajes previos")
 
 class ChatResponse(BaseModel):
     reply: str = Field(..., description="Respuesta del asistente AI")

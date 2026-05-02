@@ -29,7 +29,7 @@ from services.pocket_service import create_pocket, get_pockets, fund_pocket, upd
 
 from api.dependencies import get_current_user
 from models.domain import Account
-from langchain_core.messages import ToolMessage
+from langchain_core.messages import ToolMessage, AIMessage, HumanMessage, SystemMessage
 from langchain_core.tools import tool
 
 
@@ -213,8 +213,7 @@ async def chat_with_alfred(
             
         llm_with_tools = llm.bind_tools([crear_bolsillo_y_transferir])
         
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", """Eres Alfred, el asesor financiero inteligente de Alfred Bank.
+        system_template = """Eres Alfred, el asesor financiero inteligente de Alfred Bank.
 Contexto financiero en tiempo real del usuario:
 
 Saldo Actual Disponible: {current_balance}
@@ -235,16 +234,25 @@ MUY IMPORTANTE SOBRE LOS BOLSILLOS:
 - Si el usuario te pide crear un bolsillo o ahorrar para una meta (ej: "crea un bolsillo", "ahorra $50000 para X"), DEBES usar OBLIGATORIAMENTE la herramienta 'crear_bolsillo_y_transferir'. NO te disculpes diciendo que no puedes hacerlo.
 - Si invocas la herramienta, espera el resultado y luego respóndele al usuario con elegancia confirmando la creación y su nuevo saldo disponible.
 
-Responde SIEMPRE en formato Markdown limpio, usando negritas para el dinero."""),
-            ("human", "{user_question}")
-        ])
+Responde SIEMPRE en formato Markdown limpio, usando negritas para el dinero."""
         
-        messages = await prompt.aformat_messages(
+        system_content = system_template.format(
             current_balance=balance_cop,
             transaction_history=tx_history,
-            pockets_info=pockets_summary,
-            user_question=payload.message
+            pockets_info=pockets_summary
         )
+        
+        messages = [SystemMessage(content=system_content)]
+        
+        # Agregamos el historial de la conversación previa
+        for msg in payload.history:
+            if msg.role == "user":
+                messages.append(HumanMessage(content=msg.content))
+            elif msg.role == "alfred":
+                messages.append(AIMessage(content=msg.content))
+                
+        # Agregamos la pregunta actual
+        messages.append(HumanMessage(content=payload.message))
         
         # 5. Ejecutar cadena principal
         response = await llm_with_tools.ainvoke(messages)

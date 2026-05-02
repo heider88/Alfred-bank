@@ -5,6 +5,8 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import { formatCurrencyFromCents } from "@/utils/formatters";
 import { ArrowUp, ArrowDown, History, AlertTriangle, Sparkles, Filter, Activity, TrendingUp, PieChart as PieChartIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { ExpensesPieChart, ExpensesVsIncomeChart } from "./Charts";
 
 interface Transaction {
@@ -150,6 +152,57 @@ export default function HistorialPage() {
     return { pieData: pData, areaData: aData, totalGastos: totalG, totalIngresos: totalI };
   }, [transactions]);
 
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(22);
+    doc.setTextColor(10, 10, 10);
+    doc.text("Alfred Bank - Reporte Financiero", 14, 20);
+    
+    doc.setFontSize(11);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Generado el: ${new Date().toLocaleDateString("es-CO")}`, 14, 28);
+    
+    // Resumen
+    doc.setFontSize(14);
+    doc.setTextColor(10, 10, 10);
+    doc.text("Resumen General", 14, 40);
+    
+    doc.setFontSize(11);
+    doc.setTextColor(80, 80, 80);
+    doc.text(`Ingresos Totales: ${formatCurrencyFromCents(totalIngresos)}`, 14, 48);
+    doc.text(`Gastos Totales: ${formatCurrencyFromCents(totalGastos)}`, 14, 55);
+    doc.text(`Balance Neto: ${formatCurrencyFromCents(totalIngresos - totalGastos)}`, 14, 62);
+    
+    // Table
+    const tableData = transactions.map(tx => {
+      const isDeposit = tx.to_account_id === myAccountId;
+      const amountStr = `${isDeposit ? '+' : '-'}${formatCurrencyFromCents(tx.amount_cents)}`;
+      const dateStr = new Date(tx.timestamp).toLocaleDateString("es-CO");
+      const catLabel = CATEGORIES[tx.category as keyof typeof CATEGORIES]?.label || "Otros";
+      return [
+        dateStr,
+        tx.description || (isDeposit ? "Depósito" : "Transferencia"),
+        tx.counterparty_name || "Externo",
+        catLabel,
+        amountStr
+      ];
+    });
+
+    autoTable(doc, {
+      startY: 75,
+      head: [['Fecha', 'Descripción', 'Contraparte', 'Categoría', 'Monto']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { fillColor: [10, 10, 10] },
+      styles: { fontSize: 9 },
+      alternateRowStyles: { fillColor: [248, 250, 252] }
+    });
+
+    doc.save("Reporte_Financiero_Alfred.pdf");
+  };
+
   return (
     <DashboardLayout accountId={myAccountId || undefined}>
       <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto pb-12">
@@ -163,7 +216,10 @@ export default function HistorialPage() {
             <h1 className="text-3xl font-bold tracking-tight text-slate-900">Historial Inteligente</h1>
             <p className="text-slate-500 mt-1">Tus finanzas categorizadas automáticamente para que tomes mejores decisiones.</p>
           </div>
-          <button className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 transition-all">
+          <button 
+            onClick={generatePDF}
+            className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 transition-all active:scale-95"
+          >
             <Filter className="w-4 h-4" /> Exportar Reporte
           </button>
         </header>
@@ -307,7 +363,58 @@ export default function HistorialPage() {
                         const date = new Date(tx.timestamp);
                         const catInfo = CATEGORIES[tx.category as keyof typeof CATEGORIES] || CATEGORIES.OTROS;
                         
-                        return (
+                        const generatePDF = () => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(22);
+    doc.setTextColor(10, 10, 10);
+    doc.text("Alfred Bank - Reporte Financiero", 14, 20);
+    
+    doc.setFontSize(11);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Generado el: ${new Date().toLocaleDateString("es-CO")}`, 14, 28);
+    
+    // Resumen
+    doc.setFontSize(14);
+    doc.setTextColor(10, 10, 10);
+    doc.text("Resumen General", 14, 40);
+    
+    doc.setFontSize(11);
+    doc.setTextColor(80, 80, 80);
+    doc.text(`Ingresos Totales: ${formatCurrencyFromCents(totalIngresos)}`, 14, 48);
+    doc.text(`Gastos Totales: ${formatCurrencyFromCents(totalGastos)}`, 14, 55);
+    doc.text(`Balance Neto: ${formatCurrencyFromCents(totalIngresos - totalGastos)}`, 14, 62);
+    
+    // Table
+    const tableData = transactions.map(tx => {
+      const isDeposit = tx.to_account_id === myAccountId;
+      const amountStr = `${isDeposit ? '+' : '-'}${formatCurrencyFromCents(tx.amount_cents)}`;
+      const dateStr = new Date(tx.timestamp).toLocaleDateString("es-CO");
+      const catLabel = CATEGORIES[tx.category as keyof typeof CATEGORIES]?.label || "Otros";
+      return [
+        dateStr,
+        tx.description || (isDeposit ? "Depósito" : "Transferencia"),
+        tx.counterparty_name || "Externo",
+        catLabel,
+        amountStr
+      ];
+    });
+
+    autoTable(doc, {
+      startY: 75,
+      head: [['Fecha', 'Descripción', 'Contraparte', 'Categoría', 'Monto']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: { fillColor: [10, 10, 10] },
+      styles: { fontSize: 9 },
+      alternateRowStyles: { fillColor: [248, 250, 252] }
+    });
+
+    doc.save("Reporte_Financiero_Alfred.pdf");
+  };
+
+  return (
                           <tr key={tx.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors group">
                             <td className="px-4 py-4">
                               <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full shadow-sm ring-1 ring-inset ${
