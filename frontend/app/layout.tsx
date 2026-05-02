@@ -9,6 +9,7 @@ const manrope = Manrope({ subsets: ["latin"], variable: '--font-manrope' });
 export const metadata: Metadata = {
   title: "Alfred Bank | La banca para la nueva generación",
   description: "Gestiona tu dinero con Alfred Bank. Simple, intuitivo y sin fricciones.",
+  icons: { icon: '/alfreed.png' }
 };
 
 export default function RootLayout({

@@ -1,4 +1,3 @@
-from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -7,8 +6,8 @@ from models.domain import Account, Transaction
 
 async def execute_transfer(
     db: AsyncSession,
-    from_account_id: UUID,
-    to_account_id: UUID,
+    from_account_id: str,
+    to_account_id: str,
     amount_cents: int,
     description: str = "Transferencia"
 ) -> Transaction:

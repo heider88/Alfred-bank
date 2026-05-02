@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MessageSquare, X, Send, Loader2 } from "lucide-react";
+import { MessageSquare, X, Send, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Image from "next/image";
 
@@ -12,6 +12,13 @@ type Message = {
 };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1";
+
+const SUGGESTIONS = [
+  "¿Cuál es mi saldo actual?",
+  "Analiza mis gastos de esta semana",
+  "Crea un bolsillo de $50.000 para Vacaciones",
+  "Resumen de mis últimos movimientos"
+];
 
 export default function AlfredChat({ accountId }: { accountId: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,6 +33,17 @@ export default function AlfredChat({ accountId }: { accountId: string }) {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  const scrollSuggestions = (direction: 'left' | 'right') => {
+    if (suggestionsRef.current) {
+      const scrollAmount = 200;
+      suggestionsRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -42,38 +60,46 @@ export default function AlfredChat({ accountId }: { accountId: string }) {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    // Listen to custom event to open chat remotely (from dashboard button)
+    const handleOpenChatEvent = () => {
+      setIsOpen(true);
+      setShowWelcome(false);
+    };
+    window.addEventListener('openAlfredChat', handleOpenChatEvent);
+    return () => window.removeEventListener('openAlfredChat', handleOpenChatEvent);
+  }, []);
+
   const handleOpenChat = () => {
     setIsOpen((prev) => !prev);
     setShowWelcome(false);
   };
-  const handleSend = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!input.trim() || isLoading) return;
+  
+  const sendMessage = async (text: string) => {
+    if (!text.trim() || isLoading) return;
 
-    const userText = input.trim();
     setInput("");
     
-    // Añadir mensaje del usuario
-    const newUserMsg: Message = { id: Date.now().toString(), role: "user", content: userText };
+    const newUserMsg: Message = { id: Date.now().toString(), role: "user", content: text };
     setMessages((prev) => [...prev, newUserMsg]);
     setIsLoading(true);
 
-        try {
-            const token = localStorage.getItem("token");
-            const response = await fetch(`${API_URL}/chat`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    account_id: accountId,
-                    message: userText
-                })
-            });
-            if (!response.ok) {
-                throw new Error("Error en la respuesta de Alfred");
-            }
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_URL}/chat`, {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+              account_id: accountId,
+              message: text
+          })
+      });
+      if (!response.ok) {
+          throw new Error("Error en la respuesta de Alfred");
+      }
 
       const data = await response.json();
       
@@ -96,6 +122,12 @@ export default function AlfredChat({ accountId }: { accountId: string }) {
     }
   };
 
+  const handleSend = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!input.trim() || isLoading) return;
+    await sendMessage(input.trim());
+  };
+
   return (
     <>
       {/* Mensaje de bienvenida (Tooltip) */}
@@ -109,8 +141,8 @@ export default function AlfredChat({ accountId }: { accountId: string }) {
               <X className="w-4 h-4" />
             </button>
             <div className="flex items-center gap-2 mb-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full overflow-hidden border border-slate-100 shadow-sm shrink-0">
-                <Image src="/alfreed.png" alt="Alfred" width={32} height={32} className="object-cover" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-full overflow-hidden border border-slate-100 shadow-sm shrink-0 bg-black">
+                <img src="/alfreed.png" alt="Alfred" className="w-full h-full object-cover" />
               </div>
               <span className="font-bold text-slate-900 text-sm">alfred.</span>
             </div>
@@ -130,7 +162,9 @@ export default function AlfredChat({ accountId }: { accountId: string }) {
           isOpen ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
         }`}
       >
-        <Image src="/alfreed.png" alt="Alfred" width={56} height={56} className="object-cover rounded-full" />
+        <div className="w-full h-full rounded-full bg-black overflow-hidden relative">
+           <img src="/alfreed.png" alt="Alfred" className="absolute inset-0 w-full h-full object-cover" />
+        </div>
       </button>
 
       {/* Ventana del Chat */}
@@ -142,8 +176,8 @@ export default function AlfredChat({ accountId }: { accountId: string }) {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 bg-white/5 px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full overflow-hidden bg-black shrink-0">
-              <Image src="/alfreed.png" alt="Alfred" width={40} height={40} className="object-cover" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full overflow-hidden bg-black shrink-0 relative">
+              <img src="/alfreed.png" alt="Alfred" className="absolute inset-0 w-full h-full object-cover" />
             </div>
             <div>
               <h3 className="font-display text-sm font-bold text-white tracking-wide">alfred.</h3>
@@ -192,8 +226,49 @@ export default function AlfredChat({ accountId }: { accountId: string }) {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
-        <div className="border-t border-white/10 p-3 bg-[#0A0A0A]">
+        {/* Input & Suggestions */}
+        <div className="border-t border-white/10 p-3 bg-[#0A0A0A] flex flex-col gap-3">
+          {/* Suggestion Chips */}
+          <div className="relative flex items-center group w-full">
+            {/* Fade effect left */}
+            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#0A0A0A] to-transparent z-10 pointer-events-none"></div>
+            
+            <button
+              type="button"
+              onClick={() => scrollSuggestions('left')}
+              className="absolute left-0 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-[#0A0A0A] text-white/40 hover:text-white border border-white/10 transition-colors"
+            >
+              <ChevronLeft className="h-3 w-3" />
+            </button>
+            
+            <div 
+              ref={suggestionsRef}
+              className="flex flex-1 gap-2 overflow-x-auto px-7 pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] scroll-smooth"
+            >
+              {SUGGESTIONS.map((sug, i) => (
+                <button
+                  key={i}
+                  onClick={() => sendMessage(sug)}
+                  disabled={isLoading}
+                  className="shrink-0 rounded-full border border-white/20 bg-transparent px-3 py-1.5 text-[11px] font-semibold text-white/80 transition-all hover:bg-[#CCFF00] hover:text-black hover:border-[#CCFF00] disabled:opacity-50"
+                >
+                  {sug}
+                </button>
+              ))}
+            </div>
+
+            {/* Fade effect right */}
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#0A0A0A] to-transparent z-10 pointer-events-none"></div>
+
+            <button
+              type="button"
+              onClick={() => scrollSuggestions('right')}
+              className="absolute right-0 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-[#0A0A0A] text-white/40 hover:text-white border border-white/10 transition-colors"
+            >
+              <ChevronRight className="h-3 w-3" />
+            </button>
+          </div>
+
           <form
             onSubmit={handleSend}
             className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2 py-1 focus-within:border-[#CCFF00] focus-within:bg-white/10 transition-colors"

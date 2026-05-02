@@ -99,16 +99,6 @@ export default function ConfiguracionPage() {
                     Cambiar
                   </button>
                 </div>
-
-                <div className="flex items-center justify-between p-4 border border-slate-100 rounded-2xl">
-                  <div>
-                    <h4 className="font-semibold text-slate-900 text-sm">Verificación en dos pasos (2FA)</h4>
-                    <p className="text-xs text-slate-500 mt-0.5">Añade una capa extra de seguridad</p>
-                  </div>
-                  <button className="text-sm font-bold bg-[#CCFF00] hover:bg-[#b8e600] text-black px-4 py-2 rounded-xl transition-colors">
-                    Activar
-                  </button>
-                </div>
               </div>
             </section>
 

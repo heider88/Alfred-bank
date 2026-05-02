@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ArrowRightLeft, History, Settings, X, Wallet } from "lucide-react";
+import { LayoutDashboard, ArrowRightLeft, History, Settings, X, SplitSquareHorizontal, PiggyBank } from "lucide-react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -10,6 +10,8 @@ interface SidebarProps {
 const navItems = [
   { name: "Resumen", href: "/dashboard", icon: LayoutDashboard },
   { name: "Transferencias", href: "/dashboard/transferencias", icon: ArrowRightLeft },
+  { name: "Bolsillos", href: "/dashboard/bolsillos", icon: PiggyBank },
+  { name: "Dividir Cuenta", href: "/dashboard/dividir", icon: SplitSquareHorizontal },
   { name: "Historial", href: "/dashboard/historial", icon: History },
   { name: "Configuración", href: "/dashboard/configuracion", icon: Settings },
 ];
@@ -65,18 +67,6 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
           })}
         </nav>
         
-        {/* Bottom Decorative Element */}
-        <div className="absolute bottom-10 left-8 right-8">
-           <div className="bg-white/5 rounded-2xl p-5 border border-white/10 relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-[#CCFF00] rounded-full blur-[50px] opacity-10"></div>
-             <p className="text-xs text-white/50 font-medium relative z-10">
-               ¿Necesitas ayuda?
-             </p>
-             <p className="text-sm text-white font-bold mt-1 relative z-10">
-               Habla con soporte
-             </p>
-           </div>
-        </div>
       </aside>
     </>
   );

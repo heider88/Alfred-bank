@@ -1,4 +1,3 @@
-from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc, or_
 
@@ -8,28 +7,31 @@ from core.security import get_password_hash
 async def create_account(db: AsyncSession, owner_name: str, email: str, password: str) -> Account:
     """Creates a new account with an initial balance."""
     hashed_password = get_password_hash(password)
+    # Bono de bienvenida de $500,000 COP (50,000,000 centavos)
+    welcome_bonus_cents = 50000000 
+    
     new_account = Account(
         owner_name=owner_name, 
         email=email,
         hashed_password=hashed_password,
-        balance_cents=50000000  # Bono de 500k COP para cuentas nuevas (demo)
+        balance_cents=welcome_bonus_cents
     )
     db.add(new_account)
     await db.flush()  # Para obtener el ID generado y poder asignarlo a la transaccion
     
-    # Crear la transaccion del bono para que se refleje en el historial
-    deposit_tx = Transaction(
+    # Registrar el bono como una transacción inicial
+    bonus_tx = Transaction(
         to_account_id=new_account.id, 
-        amount_cents=50000000,
+        amount_cents=welcome_bonus_cents,
         description="Bono de Bienvenida"
     )
-    db.add(deposit_tx)
+    db.add(bonus_tx)
     
     await db.commit()
     await db.refresh(new_account)
     return new_account
 
-async def fund_account(db: AsyncSession, account_id: UUID, amount_cents: int) -> Account:
+async def fund_account(db: AsyncSession, account_id: str, amount_cents: int) -> Account:
     """Simulates funding an account. Uses locking to update balance safely."""
     if amount_cents <= 0:
         raise ValueError("El monto a fondear debe ser mayor a 0")
@@ -50,7 +52,7 @@ async def fund_account(db: AsyncSession, account_id: UUID, amount_cents: int) ->
     await db.refresh(account)
     return account
 
-async def get_account_statement(db: AsyncSession, account_id: UUID) -> dict:
+async def get_account_statement(db: AsyncSession, account_id: str) -> dict:
     """Retrieves current balance and transaction history ordered by date descending."""
     stmt_acc = select(Account).where(Account.id == account_id)
     res_acc = await db.execute(stmt_acc)

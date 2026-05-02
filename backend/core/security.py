@@ -5,7 +5,7 @@ from passlib.context import CryptContext
 import os
 
 # SECRET_KEY para JWT. En producción, esto DEBE venir de variables de entorno seguras.
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "super-secret-key-para-desarrollo-solo-habi")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "super-secret-key-para-desarrollo-solo-alfred")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 7 días para no molestar mucho en el dev
 

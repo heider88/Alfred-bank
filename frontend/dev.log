@@ -1,0 +1,13 @@
+
+> alfred-frontend@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.3
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 3.5s
+ ○ Compiling / ...
+ ✓ Compiled / in 14.5s (1377 modules)
+ HEAD / 200 in 15006ms
+[?25h

@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):
     Ejecuta la creación asíncrona de las tablas en PostgreSQL al arrancar.
     """
     async with engine.begin() as conn:
-        # Crea las tablas si no existen en la base de datos habi_db
+        # Crea las tablas si no existen en la base de datos alfred_db
         await conn.run_sync(Base.metadata.create_all)
     
     yield # La aplicación maneja peticiones aquí
@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
     await engine.dispose()
 
 app = FastAPI(
-    title="Habi Fintech API",
+    title="Alfred Fintech API",
     description="Backend escalable utilizando FastAPI, Clean Architecture y PostgreSQL Asíncrono",
     version="1.0.0",
     lifespan=lifespan
@@ -91,6 +91,6 @@ async def root():
     """Endpoint de Health Check para monitoreo de la infraestructura."""
     return {
         "status": "online", 
-        "message": "Fintech API core running smoothly connected to habi_db",
+        "message": "Fintech API core running smoothly connected to alfred_db",
         "environment": "production"
     }

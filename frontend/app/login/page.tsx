@@ -156,7 +156,7 @@ export default function LoginPage() {
           <div className="mt-8 p-4 bg-slate-50 rounded-xl border border-slate-100 text-xs text-slate-500 text-center">
             <p className="font-semibold text-slate-700 mb-1">Credenciales de prueba:</p>
             <p>Email: <span className="font-mono text-slate-900 bg-white px-1.5 py-0.5 rounded border border-slate-200">juan@alfred.bank</span></p>
-            <p className="mt-1">Pass: <span className="font-mono text-slate-900 bg-white px-1.5 py-0.5 rounded border border-slate-200">123456</span></p>
+            <p className="mt-1">Pass: <span className="font-mono text-slate-900 bg-white px-1.5 py-0.5 rounded border border-slate-200">AlfredSecure2026*</span></p>
           </div>
 
           <div className="mt-6 text-center text-sm font-medium text-slate-500">

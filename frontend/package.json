@@ -1,5 +1,5 @@
 {
-  "name": "habi-frontend",
+  "name": "alfred-frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -13,10 +13,12 @@
     "framer-motion": "^12.38.0",
     "lucide-react": "^0.378.0",
     "next": "14.2.3",
+    "qrcode.react": "^4.2.0",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.51.3",
     "react-markdown": "^10.1.0",
+    "recharts": "^3.8.1",
     "sonner": "^1.4.41",
     "zod": "^3.23.6"
   },
