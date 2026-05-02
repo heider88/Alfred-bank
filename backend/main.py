@@ -20,14 +20,20 @@ async def lifespan(app: FastAPI):
     Context Manager para manejar el ciclo de vida de la aplicación.
     Ejecuta la creación asíncrona de las tablas en PostgreSQL al arrancar.
     """
-    async with engine.begin() as conn:
-        # Crea las tablas si no existen en la base de datos alfred_db
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            # Crea las tablas si no existen en la base de datos alfred_db
+            await conn.run_sync(Base.metadata.create_all)
+    except Exception as e:
+        print(f"Advertencia: No se pudo conectar a la base de datos durante el inicio. {e}")
     
     yield # La aplicación maneja peticiones aquí
     
     # Cierre limpio de las conexiones al detener el servidor
-    await engine.dispose()
+    try:
+        await engine.dispose()
+    except Exception:
+        pass
 
 app = FastAPI(
     title="Alfred Fintech API",
